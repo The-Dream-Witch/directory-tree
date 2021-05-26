@@ -49,20 +49,23 @@ pub struct OsState<'a> {
 
 impl<'a> DEnt<'a> {
     pub fn new(name: &'a str) -> Result<Self> {
-        Ok(Self{name: name, subdir: DTree::new()})
+        Ok(Self {
+            name,
+            subdir: DTree::new(),
+        })
     }
-    
+
     fn paths(&self) -> Vec<String> {
         let mut pathvec: Vec<String> = Vec::new();
-        
+
         if !self.subdir.children.is_empty() {
             for x in &self.subdir.children {
                 for y in x.paths() {
-                    pathvec.push(self.name.to_string() + "/" + &y );
-                } 
+                    pathvec.push(self.name.to_string() + "/" + &y);
+                }
             }
         } else {
-            pathvec.push(self.name.to_string()+"/");
+            pathvec.push(self.name.to_string() + "/");
         }
 
         pathvec
@@ -91,7 +94,6 @@ impl<'a> DTree<'a> {
     /// * `DirError::SlashInName` if `name` contains `/`.
     /// * `DirError::DirExists` if `name` already exists.
     pub fn mkdir(&mut self, name: &'a str) -> Result<()> {
-        
         if name.contains('/') {
             return Err(DirError::SlashInName(name));
         }
@@ -103,8 +105,8 @@ impl<'a> DTree<'a> {
         }
 
         let entry = DEnt::new(name).unwrap();
-        
-        Ok(self.children.push(entry))
+        self.children.push(entry);
+        Ok(())
     }
 
     /// Traverse to the subdirectory given by `path` and then call `f` to visit the subdirectory.
@@ -129,9 +131,9 @@ impl<'a> DTree<'a> {
         if path.is_empty() {
             return Err(DirError::InvalidChild(""));
         }
-        
+
         let paths: Vec<&'a str> = path.iter().rev().cloned().collect();
-        return self.subdir(paths, f);
+        self.subdir(paths, f)
     }
 
     pub fn subdir<'b, F, R>(&'b self, mut path: Vec<&'a str>, f: F) -> Result<R>
@@ -148,7 +150,7 @@ impl<'a> DTree<'a> {
                 return x.subdir.subdir(path, f);
             }
         }
-    
+
         Err(DirError::InvalidChild(name))
     }
 
@@ -175,12 +177,12 @@ impl<'a> DTree<'a> {
         if path.is_empty() {
             return Err(DirError::InvalidChild("empty path"));
         }
-        
+
         let paths: Vec<&'a str> = path.iter().rev().cloned().collect();
 
-        return self.subdir_mut(paths, f);
+        self.subdir_mut(paths, f)
     }
-    
+
     fn subdir_mut<'b, F, R>(&'b mut self, mut path: Vec<&'a str>, f: F) -> Result<R>
     where
         F: FnOnce(&'b mut DTree<'a>) -> R,
@@ -188,7 +190,7 @@ impl<'a> DTree<'a> {
         if path.is_empty() {
             return Ok(f(self));
         }
-        
+
         let name = path.pop().unwrap();
 
         for x in &mut self.children {
@@ -196,7 +198,7 @@ impl<'a> DTree<'a> {
                 return x.subdir.subdir_mut(path, f);
             }
         }
-    
+
         Err(DirError::InvalidChild(name))
     }
 
@@ -220,14 +222,13 @@ impl<'a> DTree<'a> {
 
         for x in &self.children {
             for y in x.paths() {
-                pathvec.push("/".to_owned()+&y);
-            } 
+                pathvec.push("/".to_owned() + &y);
+            }
         }
         pathvec
     }
 
-    fn validdir(&self) -> Result<()> {
-        Ok(())
+    fn validdir(&self) {
     }
 }
 
@@ -261,18 +262,19 @@ impl<'a> OsState<'a> {
     ///
     /// * `DirError::InvalidChild` if the new working directory is invalid. On error, the original
     /// working directory will be retained.
-    pub fn chdir(&mut self, path: &[&'a str]) -> Result<()> { 
+    pub fn chdir(&mut self, path: &[&'a str]) -> Result<()> {
         if path.is_empty() {
             self.cwd.clear();
         } else {
-            match self.dtree.subdir(self.cwd.clone(), |dir| dir.with_subdir(path, |dest| dest.validdir())) {
-                Ok(_)  => self.cwd.extend(path.iter().cloned()),
+            match self.dtree.subdir(self.cwd.clone(), |dir| {
+                dir.with_subdir(path, |dest| dest.validdir())
+            }) {
+                Ok(_) => self.cwd.extend(path.iter().cloned()),
                 Err(e) => return Err(e),
             }
         }
 
         Ok(())
-
     }
 
     /// Make a new subdirectory with the given `name` in the working directory.
@@ -283,7 +285,7 @@ impl<'a> OsState<'a> {
     /// * `DirError::InvalidChild` if the current working directory is invalid.
     /// * `DirError::DirExists` if `name` already exists.
     pub fn mkdir(&mut self, name: &'a str) -> Result<()> {
-        if name.contains("/") {
+        if name.contains('/') {
             return Err(DirError::SlashInName(name));
         } else if self.cwd.is_empty() {
             return self.dtree.mkdir(name);
@@ -292,7 +294,8 @@ impl<'a> OsState<'a> {
         let mut pathvec = self.cwd.clone();
         pathvec.reverse();
 
-        self.dtree.subdir_mut(pathvec, |dtree| dtree.mkdir(name).unwrap())
+        self.dtree
+            .subdir_mut(pathvec, |dtree| dtree.mkdir(name).unwrap())
     }
 
     /// Produce a list of the paths from the working directory to each reachable leaf, in no
@@ -301,7 +304,7 @@ impl<'a> OsState<'a> {
     /// # Errors
     ///
     /// * `DirError::InvalidChild` if the current working directory is invalid.
-    pub fn paths(&self) -> Result<Vec<String>> {     
+    pub fn paths(&self) -> Result<Vec<String>> {
         if self.cwd.is_empty() {
             return Ok(self.dtree.paths());
         }
