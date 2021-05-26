@@ -1,0 +1,11 @@
+C:\Users\mallo\Desktop\Rust - Homework 3\hw-dtree\target\debug\deps\thiserror_impl-ffba0ebda193d3c2.dll: C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\lib.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\ast.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\attr.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\expand.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\fmt.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\prop.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\valid.rs
+
+C:\Users\mallo\Desktop\Rust - Homework 3\hw-dtree\target\debug\deps\thiserror_impl-ffba0ebda193d3c2.d: C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\lib.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\ast.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\attr.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\expand.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\fmt.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\prop.rs C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\valid.rs
+
+C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\lib.rs:
+C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\ast.rs:
+C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\attr.rs:
+C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\expand.rs:
+C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\fmt.rs:
+C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\prop.rs:
+C:\Users\mallo\.cargo\registry\src\github.com-1ecc6299db9ec823\thiserror-impl-1.0.24\src\valid.rs:
