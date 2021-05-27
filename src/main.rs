@@ -1,35 +1,27 @@
 fn main() {
-    use dtree::OsState;
-    let mut s = OsState::new();
-    s.mkdir("a").unwrap();
-    s.chdir(&["a"]).unwrap();
-    s.mkdir("b").unwrap();
-    s.chdir(&["b"]).unwrap();
-    s.mkdir("c").unwrap();
-    s.chdir(&[]).unwrap();
-    assert_eq!(&s.paths().unwrap(), &["/a/b/c/"]);
+    use rand::{distributions::Alphanumeric, Rng};
+    for _ in 0..10 {
+        let s: String = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(7)
+            .map(char::from)
+            .collect();
+        println!("{}", s);
+    }
+    let mut stringz: Vec<String> = Vec::new();
 
-    use dtree::DTree;
-    let mut da = DTree::new();
-    da.mkdir("a").unwrap();
-    da.mkdir("z").unwrap();
-    da.with_subdir_mut(&["a"], |da| da.mkdir("b").unwrap())
-        .unwrap();
-    da.with_subdir_mut(&["a"], |da| da.mkdir("c").unwrap())
-        .unwrap();
-    da.with_subdir_mut(&["a", "c"], |da| da.mkdir("d").unwrap())
-        .unwrap();
-    let mut paths = da.paths();
-    paths.sort();
-    println!("{:?}", paths);
+    for _ in 0..8 {
+        stringz.push(rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(7)
+        .map(char::from)
+        .collect::<String>());
+    }
 
-    let mut db = DTree::new();
-    db.mkdir("test").unwrap();
-    assert_eq!(&db.paths(), &["/test/"]);
+    let mut path: String = "/".to_string();
+    for x in stringz {
+        path = path + &x.to_string() + &"/".to_string(); 
+    }
 
-    let mut dd = DTree::new();
-    dd.mkdir("a").unwrap();
-    dd.with_subdir_mut(&["a"], |dd| dd.mkdir("b").unwrap())
-        .unwrap();
-    assert_eq!(&dd.paths(), &["/a/b/"]);
+    println!("{:?}", path);
 }

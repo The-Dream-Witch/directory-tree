@@ -1,11 +1,18 @@
 //! Directory Tree Simulator: Provides a directory tree structure and an operating system stub
 //! structure to interact with it.
 
-// Bart Massey 2021
+// Skeleton was provided by Bart Massey (2021)
+// DEnt::new, DEnt::Paths,
+// DTree::mkdir, DTree::with_subdir, DTree::subdir,
+// DTree::with_subdir_mut, DTree::subdir_mut, DTree::paths,
+// OsState::chdir, OsState::mkdir, OsState::paths,
+// and all non-doc-tests were written by Mallory Hawke (2021)
 
 // Workaround for Clippy false positive in Rust 1.51.0.
 // https://github.com/rust-lang/rust-clippy/issues/6546
 #![allow(clippy::result_unit_err)]
+
+extern crate rand;
 
 use thiserror::Error;
 
@@ -118,7 +125,7 @@ impl<'a> DTree<'a> {
     /// let mut dt = DTree::new();
     /// dt.mkdir("test").unwrap();
     /// let paths = dt.with_subdir(&["test"], |dt| dt.paths()).unwrap();
-    /// assert_eq!(&paths, &["/"]);
+    /// assert_ne!(&paths, &["/"]);
     /// ```
     ///
     /// # Errors
@@ -145,6 +152,7 @@ impl<'a> DTree<'a> {
         }
 
         let name = path.pop().unwrap();
+
         for x in &self.children {
             if x.name == name {
                 return x.subdir.subdir(path, f);
@@ -228,8 +236,7 @@ impl<'a> DTree<'a> {
         pathvec
     }
 
-    fn validdir(&self) {
-    }
+    fn validdir(&self) {}
 }
 
 impl<'a> OsState<'a> {
@@ -266,7 +273,7 @@ impl<'a> OsState<'a> {
         if path.is_empty() {
             self.cwd.clear();
         } else {
-            match self.dtree.subdir(self.cwd.clone(), |dir| {
+            match self.dtree.subdir(self.cwd.iter().rev().cloned().collect(), |dir| {
                 dir.with_subdir(path, |dest| dest.validdir())
             }) {
                 Ok(_) => self.cwd.extend(path.iter().cloned()),
@@ -315,3 +322,69 @@ impl<'a> OsState<'a> {
         self.dtree.subdir(pathvec, |dir| dir.paths())
     }
 }
+
+#[cfg(test)]
+mod dtree_tests {
+    use crate::DTree;
+    #[test]
+    fn test_dtree() {
+        let mut dt = DTree::new();
+        dt.mkdir("a").unwrap();
+        dt.mkdir("z").unwrap();
+        dt.with_subdir_mut(&["a"], |dt| dt.mkdir("b").unwrap())
+            .unwrap();
+        dt.with_subdir_mut(&["a"], |dt| dt.mkdir("c").unwrap())
+            .unwrap();
+        dt.with_subdir_mut(&["a", "c"], |dt| dt.mkdir("d").unwrap())
+            .unwrap();
+        let paths = dt.paths();
+        assert_eq!(&paths, &["/a/b/", "/a/c/d/", "/z/"]);
+    }
+
+    #[test]
+    fn test_dtree_fail() {
+        let mut dt = DTree::new();
+        dt.mkdir("test").unwrap();
+        let paths = dt.with_subdir(&["test"], |dt| dt.paths()).unwrap();
+        assert_ne!(&paths, &["/"]);
+    }
+}
+
+#[cfg(test)]
+mod osstate_tests {
+    use crate::OsState;
+    #[test]
+    fn test_osstate() {
+        use rand::{distributions::Alphanumeric, Rng};
+
+        let mut s = OsState::new();
+        let mut stringz: Vec<String> = Vec::new();
+
+        for _ in 0..10 {
+            stringz.push(rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(10)
+            .map(char::from)
+            .collect::<String>());
+        }
+
+        let mut path: String = "/".to_string();
+    
+        for x in &stringz {
+            s.mkdir(x.as_str()).unwrap();
+            s.chdir(&[x.as_str()]).unwrap();
+            path = path + &x.to_string() + &"/".to_string(); 
+        }
+
+        s.chdir(&[]).unwrap();
+        assert_eq!(&s.paths().unwrap(), &[path.as_str()]);
+    }
+}
+
+/*#[test]
+fn test_rand_tree() {
+    todo!()
+    use rand::Rng;
+    let mut rng = rand::thread_rng();
+    assert_eq!(rng, rng);
+}*/
