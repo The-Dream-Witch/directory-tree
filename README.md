@@ -1,73 +1,54 @@
-## Background
+<h6>
+Mallory S. Hawke</br>
+CS410P, Spring 2021</br>
+Homework 3
+</h6>
+<div align = "center">
+<h1>Directory Tree Simulator</h1>
+</div>
 
-Most operating systems these days have filesystems. Most of
-those filesystems have tree-structured directories. Working
-with directory trees is an essential part of filesystem
-operation.
 
-In most directory trees the tree itself owns the path
-component names. However, this reduces opportunities for
-sharing in an in-memory directory tree. Perhaps it would be
-useful for a directory tree to *borrow* its component names?
+<h3>What does it do?</h3>
+This is a library that implements a simulated portion of an operating system's directory
+system. It allows for instatiation of an Operating System State (OsState), 
+Directory Tree (DTree), or Directory Entry (DEnt), which enables the construction,
+and navigation, of directory 'paths.' 
 
-## Assignment
+<h3>How does it do it?</h3>
 
-In this assignment, you will write a library crate that
-provides a directory tree implementation, and a bit of
-operating system state to model the concept of "current
-working directory".
+It builds off of a (completely unalterable, due to the assignment constraints)
+skeleton, written by Bart Massey, which consisted of the following pieces:
 
-The code skeleton for the assignment is at
-<http://github.com/pdx-cs-rust/hw-dtree> and includes
-full Rustdoc including some examples and doctest. Please do
-not alter the skeleton as given. Simply clone it and then:
+* enum: DirError
+* type: Result
+* structs: DTree, DEnt, OsState
 
-* Replace all the `todo!()` annotations with working code.
+Although the basic framework, and many function / method headers, were provided, it was up
+to me to implement the core features:
 
-* Write sufficient additional unit tests to convince
-  yourself that your implementation is correct.
+- DEnt objects have the ability to be created indepent of any other structure, as well as to return a comprehensive list of all directories immediate to itself (its subdirectory).
 
-## Hints
+- DTrees have the ability to be created independent of an OsState, can create a new directory (DEnt) of a given name as a child, can return a comprehensive listing of all directories, in order, as they appear within the tree. Additionally, it has two pair (one for mutable purposes, one for immutable) of functions (wrapper function / body function) which allow for traversal through the tree, and execution of a closure once having navigated to the appropriate directory.
 
-* As things stand, the paths produced by `DTree::paths()`
-  and `OsState::paths()` always start and end with `/`.
+- OsState makes use of the groundwork laid by the previous two implementations, and builds upon it. As with the previous two, an OsState may be instantiated, a new directory may be created within it, and it can return a vector containing all paths, as they appear in the tree; unlike the other two implementations, OsState needs to handle keeping track of the current working directory, and has its own method for doing so. This method ultimately utilizes DEnt's subdirectory navigation functionality as a way to check that the directory being changed to is valid.
 
-* Some of the methods here are easily implemented in terms
-  of others of the methods. In particular,
-  `DTree::with_subdir()` and `DTree::with_subdir_mut()` are
-  pretty powerful building blocks.
+For clarity, each OsState has a DTree and a current working directory (cwd), each DTree has children (a DEnt vector), and each DEnt has a subdirectory (a DTree vector) as well as a name.
 
-* It is fine to add private stuff to your library, as long
-  as you don't break the public interface.
+<h3>How do we know it works/doesn't break?</h3>
+Without some form of formal verification, we don't. But the following tests were written with the intent of making it pretty likely that the library functions as intended:
+</br>
+</br>
 
-## Requirements
+<h4>OsState Tests</h4>
 
-* Your library must build with current `stable` Rust.
+* **osstate_rand** - Creates a new OsState, then randomly generates ten, ten character long, strings which it stores in a vector. Each string in the vector is then fed into the OsState as a new directory, the OsState's current working directory is changed to the newly created one, and the string is concatenated onto a path string. At the end, the current working directory is set to root, and the path string is compared to the result of OsState's paths method.</br>
+* **osstate_bad_chdir** - Creates a new OsState, creates a new directory `named: x`, then tries to change the current working directory to a directory `named: q` , which does not exist. Expected to panic.</br>
+* **osstate_bad_mkdir** - Attempts the creation of a new directory `named: /`; expected to panic.</br>
+* **osstate_double** - Attempts the creation of two directories, back to back, both `named: a`. Also expected to panic.</br></br>
 
-* Your library implementations should contain adequate tests
-  (implemented using `#[test]` unit-testing) and assertions
-  (implemented using `assert!()` and related macros).
+<h4>DTree Tests</h4>
 
-* Your code must be formatted according to the official Rust
-  formatting style — use `cargo fmt` to reformat your code
-  in-place.
-
-* Your code must produce no compiler warnings, and `cargo
-  clippy` must also produce no warnings. Please do not
-  disable warnings except in the most unusual circumstances:
-  fix them instead.
-
-Please submit a ZIP archive containing:
-
-* Your `Cargo.toml` and `Cargo.lock`.
-
-* Your `src/lib.rs`.
-
-* Any other source or other text files that are
-  necessary/useful.
-
-* A `README.md` file in Markdown format giving a writeup of
-  what you did, how it went, and how you tested your work.
-
-* Nothing else. Not your git repo. None of the funny Mac
-  garbage files. Not your `target/` directory.
+* **dtree_static** - Attempts to create a series of directories with predetermined names, in a predetermined order; once the directories have been created, the result of dtree's `paths` method is compared against a predetermined array.</br>
+* **dtree_rand** - Randomly generates a ten character long string, then uses that string to create a new directory. Compares the results of the `paths` method to an array containing the generated path. </br>
+* **dtree_slash** - Creates a new DTree, then attempts to make a directory `named: /a`; expected to panic. </br>
+* **dtree_double** - Creates a new DTree, then attempts to create two directories, back to back, both `named: a`; expected to panic.
