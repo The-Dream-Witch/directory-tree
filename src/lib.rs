@@ -151,7 +151,7 @@ impl<'a> DTree<'a> {
     }
 
     ///Recursive portion of with_subdir that takes a vector; this way we can use pop, so when our vector is empty, we know we've hit the end.
-    pub fn subdir<'b, F, R>(&'b self, mut path: Vec<&'a str>, f: F) -> Result<R>
+    fn subdir<'b, F, R>(&'b self, mut path: Vec<&'a str>, f: F) -> Result<R>
     where
         F: FnOnce(&'b DTree<'a>) -> R,
     {
@@ -280,9 +280,13 @@ impl<'a> OsState<'a> {
         if path.is_empty() {
             self.cwd.clear();
         } else {
-            match self.dtree.subdir(self.cwd.iter().rev().cloned().collect(), |dir| {
-                dir.with_subdir(path, |_| {})
-            }).unwrap() {
+            match self
+                .dtree
+                .subdir(self.cwd.iter().rev().cloned().collect(), |dir| {
+                    dir.with_subdir(path, |_| {})
+                })
+                .unwrap()
+            {
                 Ok(_) => self.cwd.extend(path.iter().cloned()),
                 Err(_) => return Err(DirError::InvalidChild("chdir")),
             }
@@ -307,7 +311,7 @@ impl<'a> OsState<'a> {
 
         let mut pathvec = self.cwd.clone();
         pathvec.reverse();
-        
+
         self.dtree
             .subdir_mut(pathvec, |dtree| dtree.mkdir(name).unwrap())
     }
@@ -359,11 +363,11 @@ mod dtree_tests {
             .map(char::from)
             .collect::<String>();
         let mut dt = DTree::new();
-    
+
         dt.mkdir(&x).unwrap();
-        assert_eq!(&dt.paths(), &["/".to_owned()+&x+"/"]);
+        assert_eq!(&dt.paths(), &["/".to_owned() + &x + "/"]);
     }
-    
+
     ///Test for dtree that checks to make sure that slashes in names are invalid
     #[test]
     #[should_panic]
@@ -393,21 +397,23 @@ mod osstate_tests {
 
         let mut s = OsState::new();
         let mut stringz: Vec<String> = Vec::new();
-        
+
         for _ in 0..10 {
-            stringz.push(rand::thread_rng()
-                .sample_iter(&Alphanumeric)
-                .take(10)
-                .map(char::from)
-                .collect::<String>());
+            stringz.push(
+                rand::thread_rng()
+                    .sample_iter(&Alphanumeric)
+                    .take(10)
+                    .map(char::from)
+                    .collect::<String>(),
+            );
         }
 
         let mut path: String = "/".to_string();
-    
+
         for x in &stringz {
             s.mkdir(x.as_str()).unwrap();
             s.chdir(&[x.as_str()]).unwrap();
-            path = path + &x.to_string() + &"/".to_string(); 
+            path = path + &x.to_string() + &"/".to_string();
         }
 
         s.chdir(&[]).unwrap();
@@ -430,7 +436,7 @@ mod osstate_tests {
         let mut s = OsState::new();
         s.mkdir("/").unwrap();
     }
-    
+
     #[test]
     #[should_panic]
     fn osstate_double() {
